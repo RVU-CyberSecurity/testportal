@@ -22,7 +22,7 @@ const state = {
 const DEMO_USERS = {
   'basavarajp@rvu.edu.in': { name: 'Admin Coordinator', role: 'admin', password: 'Pass123', avatar: 'A' },
   'basavarajp@rvu.edu.in': { name: 'Dr. Basavaraj Patil', role: 'mentor', password: 'Pass123', avatar: 'R', projects: [1, 2, 3, 4] },
-  'basavarajp@rvu.edu.in': { name: 'Student', role: 'student', password: 'Pass123', avatar: 'M', project: 1, college: 'RVU' }
+  'bbpatilcs@gmail.com': { name: 'Student', role: 'student', password: 'Pass123', avatar: 'M', project: 1, college: 'RVU' }
 };
 
 // Project data from Excel
