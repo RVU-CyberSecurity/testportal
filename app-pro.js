@@ -20,9 +20,9 @@ const state = {
 
 // Demo users (in production, use real authentication backend)
 const DEMO_USERS = {
-  'admin@interntrack.edu': { name: 'Admin Coordinator', role: 'admin', password: 'Pass123', avatar: 'A' },
-  'mentor@college.edu': { name: 'Dr. Ramesh Kumar', role: 'mentor', password: 'Pass123', avatar: 'R', projects: [1, 2, 3, 4] },
-  'student@college.edu': { name: 'Mukhil Kumaran S', role: 'student', password: 'Pass123', avatar: 'M', project: 1, college: 'Kumaraguru College of Technology' }
+  'basavarajp@rvu.edu.in': { name: 'Admin Coordinator', role: 'admin', password: 'Pass123', avatar: 'A' },
+  'basavarajp@rvu.edu.in': { name: 'Dr. Basavaraj Patil', role: 'mentor', password: 'Pass123', avatar: 'R', projects: [1, 2, 3, 4] },
+  'basavarajp@rvu.edu.in': { name: 'Student', role: 'student', password: 'Pass123', avatar: 'M', project: 1, college: 'RVU' }
 };
 
 // Project data from Excel
@@ -138,7 +138,7 @@ function handleLogin() {
 
   const user = DEMO_USERS[email];
   if (!user || user.password !== password) {
-    showError('login-error', 'Invalid credentials. Try: admin@interntrack.edu / Pass123');
+    showError('login-error', 'Invalid credentials. Try: basavarajp@rvu.edu.in / Pass123');
     return;
   }
 
