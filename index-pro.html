@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InternTrack Pro — Role-Based Internship Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     LOGIN SCREEN — Role Selection + Credentials
+════════════════════════════════════════════════ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-bg">
+    <div class="login-grid"></div>
+    <div class="login-glow"></div>
+  </div>
+
+  <div class="login-container">
+    <!-- Role Selection -->
+    <div id="role-select" class="login-card active-step">
+      <div class="login-logo">
+        <span class="logo-icon"><i class="ti ti-building-community"></i></span>
+        <span class="logo-text">Intern<span class="accent">Track</span> Pro</span>
+      </div>
+      <div class="login-tagline">Cybersecurity Internship Management Platform</div>
+      <div class="login-divider"></div>
+      <div class="login-step-label">Step 1: Select Your Role</div>
+
+      <div class="role-grid">
+        <button class="role-card" onclick="selectRole('admin')">
+          <div class="role-icon"><i class="ti ti-crown"></i></div>
+          <div class="role-title">Administrator</div>
+          <div class="role-desc">Program coordinator · Manage all projects and students · GitHub org access</div>
+        </button>
+        <button class="role-card" onclick="selectRole('mentor')">
+          <div class="role-icon"><i class="ti ti-users"></i></div>
+          <div class="role-title">Mentor / Faculty</div>
+          <div class="role-desc">Guide projects · Review submissions · Track student progress</div>
+        </button>
+        <button class="role-card" onclick="selectRole('student')">
+          <div class="role-icon"><i class="ti ti-bookmark"></i></div>
+          <div class="role-title">Student</div>
+          <div class="role-desc">Submit assignments · Track progress · Access project resources</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="login-card" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+        <button class="back-btn" onclick="backToRole()"><i class="ti ti-arrow-left"></i></button>
+        <div>
+          <div class="login-step-label">Step 2: Sign In</div>
+          <div id="role-display" style="font-size:12px;color:var(--text3)"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Email Address</div>
+        <input type="email" id="login-email" class="form-input" placeholder="name@college.edu" onkeypress="handleLoginKeypress(event)">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Password</div>
+        <div class="password-field">
+          <input type="password" id="login-password" class="form-input" placeholder="Enter password" onkeypress="handleLoginKeypress(event)">
+          <button class="toggle-pwd-btn" onclick="togglePasswordVis()"><i class="ti ti-eye" id="pwd-icon"></i></button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="remember-me" checked>
+          <span>Remember me for 30 days</span>
+        </label>
+      </div>
+
+      <button class="btn-primary full-width" onclick="handleLogin()" id="login-btn">Sign In</button>
+
+      <div style="text-align:center;margin-top:14px">
+        <button class="btn-link" onclick="showGitHubAuth()">Or connect with GitHub →</button>
+      </div>
+
+      <div id="login-error" class="alert alert-error" style="display:none;margin-top:12px"></div>
+      <div id="login-loading" class="alert alert-info" style="display:none;margin-top:12px">
+        <i class="ti ti-loader-2 spin"></i> Signing in...
+      </div>
+
+      <!-- GitHub OAuth -->
+      <div id="github-section" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;text-align:center">
+          Connect your GitHub account for repo submissions
+        </div>
+        <button class="btn-github" onclick="initiateGitHubAuth()">
+          <i class="ti ti-brand-github"></i> Authorize with GitHub
+        </button>
+      </div>
+    </div>
+
+    <!-- Demo Users Hint -->
+    <div class="demo-hint">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Demo Credentials:</div>
+      <div style="font-size:11px;font-family:monospace;line-height:1.8;color:var(--text2)">
+        <div><strong>Admin:</strong> admin@interntrack.edu / Pass123</div>
+        <div><strong>Mentor:</strong> mentor@college.edu / Pass123</div>
+        <div><strong>Student:</strong> student@college.edu / Pass123</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-footer">
+    InternTrack Pro v2.0 · Cybersecurity Internship Program · Built with GitHub Integration
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     MAIN APPLICATION (hidden until logged in)
+════════════════════════════════════════════════ -->
+<div id="app" class="app" style="display:none">
+
+  <!-- Header with Role Indicator -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <i class="ti ti-menu-2"></i>
+      </button>
+      <div class="logo">
+        <i class="ti ti-building-community"></i>
+        Intern<span class="accent">Track</span>
+      </div>
+      <div class="role-badge" id="role-badge"></div>
+    </div>
+
+    <div class="hdr-center">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Search projects, students, submiss…" id="global-search" oninput="globalSearch(this.value)">
+      </div>
+    </div>
+
+    <div class="hdr-right">
+      <button class="icon-btn" onclick="openModal('notif-m')" title="Notifications">
+        <i class="ti ti-bell"></i>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="icon-btn" onclick="openModal('github-config')" title="GitHub Settings">
+        <i class="ti ti-brand-github"></i>
+      </button>
+      <div class="user-profile" onclick="toggleUserMenu()">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-info" id="user-info">
+          <div class="user-name">Admin User</div>
+          <div class="user-email">admin@interntrack.edu</div>
+        </div>
+        <i class="ti ti-chevron-down"></i>
+      </div>
+      <div class="user-menu" id="user-menu" style="display:none">
+        <a class="menu-item" onclick="openModal('profile-m')"><i class="ti ti-user"></i>Profile</a>
+        <a class="menu-item" onclick="openModal('github-config')"><i class="ti ti-brand-github"></i>GitHub Settings</a>
+        <div class="menu-sep"></div>
+        <a class="menu-item danger" onclick="logout()"><i class="ti ti-logout"></i>Sign Out</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+      <div class="nav-group" id="nav-main"></div>
+      <div class="sidebar-foot">
+        <div class="quick-stats" id="quick-stats"></div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- ADMIN DASHBOARD -->
+      <section class="page" id="page-dashboard" data-role="admin">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-sub">Program overview · Real-time metrics · 26 projects · 184 students</p>
+          </div>
+          <button class="btn-primary sm" onclick="refreshDash()"><i class="ti ti-refresh"></i> Refresh</button>
+        </div>
+
+        <div class="metrics-grid" id="metrics-container"></div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-alert-triangle"></i> Projects Needing Attention</div>
+            <div id="attention-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-chart-bar"></i> Submissions This Week</div>
+            <div id="submission-chart" class="chart-container"></div>
+            <div class="chart-label">Daily submission count</div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-users"></i> Faculty Workload</div>
+            <div id="faculty-load"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-activity"></i> Recent Activity</div>
+            <div id="recent-activity"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECTS MANAGEMENT (Admin/Mentor) -->
+      <section class="page" id="page-projects" data-role="admin,mentor">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">Projects</h1>
+            <p class="page-sub">26 cybersecurity projects · Manage allocations and progress</p>
+          </div>
+          <button class="btn-primary sm" onclick="openModal('new-project-m')" id="new-proj-btn" style="display:none">
+            <i class="ti ti-plus"></i> New Project
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="ti ti-search"></i>
+            <input type="text" placeholder="Search projects…" id="proj-search" oninput="filterProjects()">
+          </div>
+          <select id="proj-status-filter" onchange="filterProjects()">
+            <option value="">All Status</option>
+            <option>In Progress</option><option>Completed</option><option>On Hold</option>
+          </select>
+          <select id="proj-faculty-filter" onchange="filterProjects()">
+            <option value="">All Faculty</option>
+          </select>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-hdr">
+            <div class="col-1">#</div>
+            <div class="col-4">Project Name</div>
+            <div class="col-3">Guide</div>
+            <div class="col-2">Students</div>
+            <div class="col-2">Progress</div>
+            <div class="col-2">Status</div>
+            <div class="col-2">Actions</div>
+          </div>
+          <div id="projects-list"></div>
+        </div>
+      </section>
+
+      <!-- STUDENTS MANAGEMENT -->
+      <section class="page" id="page-students" data-role="admin,mentor">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">Students</h1>
+            <p class="page-sub">184 students across 26 projects</p>
+          </div>
+          <button class="btn-primary sm" onclick="exportStudentList()" id="export-btn" style="display:none">
+            <i class="ti ti-download"></i> Export List
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="ti ti-search"></i>
+            <input type="text" placeholder="Search by name, email, college…" id="student-search" oninput="filterStudents()">
+          </div>
+          <select id="student-project-filter" onchange="filterStudents()">
+            <option value="">All Projects</option>
+          </select>
+          <select id="student-status-filter" onchange="filterStudents()">
+            <option value="">All Status</option>
+            <option>Active</option><option>Completed</option><option>Inactive</option>
+          </select>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-hdr">
+            <div class="col-1">S.No</div>
+            <div class="col-3">Name</div>
+            <div class="col-3">College</div>
+            <div class="col-3">Email</div>
+            <div class="col-2">Project</div>
+            <div class="col-2">Status</div>
+            <div class="col-2">Actions</div>
+          </div>
+          <div id="students-list"></div>
+        </div>
+      </section>
+
+      <!-- SUBMISSIONS (for all roles) -->
+      <section class="page" id="page-submissions" data-role="admin,mentor,student">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">Submissions</h1>
+            <p class="page-sub" id="sub-page-sub">Track all student submissions · GitHub integration</p>
+          </div>
+          <button class="btn-primary sm" onclick="openModal('submit-work-m')" id="new-submit-btn" style="display:none">
+            <i class="ti ti-plus"></i> Submit Work
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="ti ti-search"></i>
+            <input type="text" placeholder="Search submissions…" id="sub-search" oninput="filterSubmissions()">
+          </div>
+          <select id="sub-type-filter" onchange="filterSubmissions()">
+            <option value="">All Types</option>
+            <option>Assignment</option><option>Report</option><option>Code</option><option>Presentation</option>
+          </select>
+          <button class="btn sm" onclick="fetchFromGitHub()">
+            <i class="ti ti-brand-github"></i> Fetch from GitHub
+          </button>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-hdr">
+            <div class="col-4">File / Commit</div>
+            <div class="col-2">Student</div>
+            <div class="col-2">Project</div>
+            <div class="col-2">Type</div>
+            <div class="col-2">Date</div>
+            <div class="col-2">Status</div>
+            <div class="col-2">Actions</div>
+          </div>
+          <div id="submissions-list"></div>
+        </div>
+      </section>
+
+      <!-- MENTOR REPORTS (Mentor view) -->
+      <section class="page" id="page-myprojects" data-role="mentor">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">My Projects</h1>
+            <p class="page-sub" id="mentor-proj-sub">Projects you're guiding</p>
+          </div>
+        </div>
+
+        <div class="projects-grid" id="mentor-projects-grid"></div>
+      </section>
+
+      <!-- STUDENT DASHBOARD -->
+      <section class="page" id="page-mystudent" data-role="student">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">My Project</h1>
+            <p class="page-sub" id="student-proj-sub">Your internship project details</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-info-circle"></i> Project Details</div>
+            <div id="student-proj-details"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-users"></i> Team Members</div>
+            <div id="student-team-members"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="ti ti-clipboard-list"></i> Your Submissions</div>
+          <div id="student-submissions"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="ti ti-progress-bolt"></i> Milestones & Tasks</div>
+          <div id="student-milestones"></div>
+        </div>
+      </section>
+
+      <!-- PROGRESS TRACKING -->
+      <section class="page" id="page-progress" data-role="admin,mentor">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">Progress Analytics</h1>
+            <p class="page-sub">Project completion rates and student performance</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-chart-line"></i> Overall Completion</div>
+            <div id="completion-chart" class="chart-container" style="height:150px"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-chart-pie"></i> Project Categories</div>
+            <div id="category-chart" class="chart-container" style="height:150px"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="ti ti-topology-star"></i> Top Performing Projects</div>
+          <div id="top-projects"></div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="page" id="page-reports" data-role="admin">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">Reports & Analytics</h1>
+            <p class="page-sub">Generate and export program reports</p>
+          </div>
+        </div>
+
+        <div class="reports-grid">
+          <div class="report-card" onclick="generateReport('weekly')">
+            <div class="report-icon" style="color:var(--blue)"><i class="ti ti-calendar-week"></i></div>
+            <div class="report-title">Weekly Summary</div>
+            <div class="report-desc">Compilation of weekly progress across all projects</div>
+            <button class="btn-primary sm" onclick="event.stopPropagation();generateReport('weekly')">
+              <i class="ti ti-download"></i> Generate
+            </button>
+          </div>
+          <div class="report-card" onclick="generateReport('student')">
+            <div class="report-icon" style="color:var(--accent)"><i class="ti ti-users"></i></div>
+            <div class="report-title">Student Performance</div>
+            <div class="report-desc">Individual student progress and evaluation</div>
+            <button class="btn-primary sm" onclick="event.stopPropagation();generateReport('student')">
+              <i class="ti ti-download"></i> Generate
+            </button>
+          </div>
+          <div class="report-card" onclick="generateReport('project')">
+            <div class="report-icon" style="color:var(--amber)"><i class="ti ti-folder"></i></div>
+            <div class="report-title">Project Status</div>
+            <div class="report-desc">Detailed project completion and risk assessment</div>
+            <button class="btn-primary sm" onclick="event.stopPropagation();generateReport('project')">
+              <i class="ti ti-download"></i> Generate
+            </button>
+          </div>
+          <div class="report-card" onclick="generateReport('final')">
+            <div class="report-icon" style="color:var(--purple)"><i class="ti ti-certificate"></i></div>
+            <div class="report-title">Final Evaluation</div>
+            <div class="report-desc">Program completion summary and certifications</div>
+            <button class="btn-primary sm" onclick="event.stopPropagation();generateReport('final')">
+              <i class="ti ti-download"></i> Generate
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+
+  <!-- GitHub Config Modal -->
+  <div class="modal" id="github-config">
+    <div class="modal-hdr">
+      GitHub Integration Settings
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">GitHub Organization</label>
+        <input type="text" class="form-input" id="gh-org" placeholder="e.g. my-university-org">
+        <div class="form-hint">Your GitHub classroom organization name</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Personal Access Token</label>
+        <div class="password-field">
+          <input type="password" class="form-input" id="gh-token" placeholder="ghp_xxxxx...">
+          <button class="toggle-pwd-btn" onclick="toggleGhToken()"><i class="ti ti-eye" id="gh-eye"></i></button>
+        </div>
+        <div class="form-hint">With <code>repo</code> and <code>read:org</code> scopes</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">OAuth App Client ID</label>
+        <input type="text" class="form-input" id="gh-client-id" placeholder="Ov23li...">
+        <div class="form-hint">For student GitHub login</div>
+      </div>
+
+      <div id="gh-status" class="alert alert-info" style="display:none;margin-top:12px"></div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="testGHConnection()">
+          <i class="ti ti-plug"></i> Test Connection
+        </button>
+        <button class="btn-primary" onclick="saveGHConfig()">
+          <i class="ti ti-check"></i> Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div class="modal" id="profile-m">
+    <div class="modal-hdr">
+      Your Profile
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="profile-body"></div>
+  </div>
+
+  <!-- Notifications Modal -->
+  <div class="modal" id="notif-m">
+    <div class="modal-hdr">
+      Notifications (3)
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="notif-body"></div>
+  </div>
+
+  <!-- New Project Modal -->
+  <div class="modal" id="new-project-m">
+    <div class="modal-hdr">
+      Add New Project
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Project Name</label>
+        <input type="text" class="form-input" id="np-name" placeholder="Project title">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Guide / Mentor</label>
+          <select class="form-input" id="np-mentor"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Students</label>
+          <input type="number" class="form-input" id="np-max-students" value="7" min="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">GitHub Repository</label>
+        <input type="text" class="form-input" id="np-repo" placeholder="org/repo">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" onclick="createProject()">Create Project</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Work Modal -->
+  <div class="modal" id="submit-work-m">
+    <div class="modal-hdr">
+      Submit Your Work
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Submission Type</label>
+        <select class="form-input" id="sm-type">
+          <option>Assignment</option><option>Report</option><option>Code</option><option>Presentation</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" class="form-input" id="sm-title" placeholder="e.g. Week 3 Assignment">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">File / Code Link (GitHub)</label>
+        <input type="text" class="form-input" id="sm-file" placeholder="https://github.com/org/repo/blob/main/file">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes / Description</label>
+        <textarea class="form-input" id="sm-notes" rows="3" placeholder="Briefly describe your submission…"></textarea>
+      </div>
+
+      <div id="sm-status" class="alert" style="display:none;margin-top:12px"></div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" id="sm-btn" onclick="submitWork()">
+          <i class="ti ti-upload"></i> Submit
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Main Application Scripts -->
+<script src="app-pro.js"></script>
+</body>
+</html>
